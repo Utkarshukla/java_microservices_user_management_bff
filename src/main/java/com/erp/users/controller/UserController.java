@@ -2,6 +2,7 @@ package com.erp.users.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +16,10 @@ import com.erp.users.constant.UserConstant;
 import com.erp.users.dto.ResponseDto;
 import com.erp.users.dto.UserDto;
 import com.erp.users.service.IUserService;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -22,7 +27,8 @@ import lombok.AllArgsConstructor;
 @RestController
 @RequestMapping("/api/users")
 @AllArgsConstructor
-public class UserController {
+@Validated
+public class UserController  {
 	IUserService userService;
 	
 	@GetMapping("")
@@ -43,7 +49,7 @@ public class UserController {
 	
 	
 	@PostMapping("/create")
-	public ResponseEntity<ResponseDto> storeUser(@RequestBody UserDto userDto) {
+	public ResponseEntity<ResponseDto> storeUser(@Valid @RequestBody UserDto userDto) {
 		try {
 			userService.createUser(userDto);
 			
@@ -76,7 +82,7 @@ public class UserController {
 	}
 	
 	@PutMapping("/update")
-	public ResponseEntity<ResponseDto> updateUser(@RequestBody UserDto userDto) {
+	public ResponseEntity<ResponseDto> updateUser(@Valid @RequestBody UserDto userDto) {
 		try {
 			UserDto existingUser = userService.updateUser(userDto);
 			
@@ -89,7 +95,9 @@ public class UserController {
 	}
 	
 	@DeleteMapping("/delete")
-	public ResponseEntity<ResponseDto> deleteUser(@RequestParam Long id) {
+	public ResponseEntity<ResponseDto> deleteUser(@RequestParam
+			@Pattern(regexp = "^[0-9]+$", message = "Invalid user ID")
+			Long id) {
 		try {
 			// delete user by id
 			 userService.deleteUser(id); // Check if user exists
