@@ -1,5 +1,7 @@
 package com.erp.users.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -17,21 +19,27 @@ import com.erp.users.dto.ResponseDto;
 import com.erp.users.dto.UserDto;
 import com.erp.users.service.IUserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
-
-import java.util.List;
-
 import lombok.AllArgsConstructor;
-
 @RestController
 @RequestMapping("/api/users")
 @AllArgsConstructor
 @Validated
+@Tag(name = "User Controller", description = "User Management CRUD API At User Module")
 public class UserController  {
 	IUserService userService;
 	
 	@GetMapping("")
+	@Operation(summary = "Get all users", description = "Get all users from the database")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "Users fetched successfully"),
+		@ApiResponse(responseCode = "500", description = "Internal server error")
+	})
 	public ResponseEntity<ResponseDto> indexUser() {
 		try {
 			
@@ -49,6 +57,12 @@ public class UserController  {
 	
 	
 	@PostMapping("/create")
+	@ApiResponses({
+		@ApiResponse(responseCode = "201", description = "User created successfully"),
+		@ApiResponse(responseCode = "400", description = "Invalid user data"),
+		@ApiResponse(responseCode = "500", description = "Internal server error")
+	})
+	@Operation(summary = "Create a new user", description = "Create a new user in the database")
 	public ResponseEntity<ResponseDto> storeUser(@Valid @RequestBody UserDto userDto) {
 		try {
 			userService.createUser(userDto);
@@ -69,6 +83,11 @@ public class UserController  {
 	
 	
 	@GetMapping("/view")
+	@Operation(summary = "Get a user by id", description = "Get a user by id from the database")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "User fetched successfully"),
+		@ApiResponse(responseCode = "500", description = "Internal server error")
+	})
 	public ResponseEntity<ResponseDto> showUser(@RequestParam Long id) {
 		try {
 			UserDto userDto= userService.showUser(id);
@@ -82,6 +101,11 @@ public class UserController  {
 	}
 	
 	@PutMapping("/update")
+	@Operation(summary = "Update a user", description = "Update a user in the database")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "User updated successfully"),
+		@ApiResponse(responseCode = "500", description = "Internal server error")
+	})
 	public ResponseEntity<ResponseDto> updateUser(@Valid @RequestBody UserDto userDto) {
 		try {
 			UserDto existingUser = userService.updateUser(userDto);
@@ -95,6 +119,11 @@ public class UserController  {
 	}
 	
 	@DeleteMapping("/delete")
+	@Operation(summary = "Delete a user", description = "Delete a user from the database")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "User deleted successfully"),
+		@ApiResponse(responseCode = "500", description = "Internal server error")
+	})
 	public ResponseEntity<ResponseDto> deleteUser(@RequestParam
 			@Pattern(regexp = "^[0-9]+$", message = "Invalid user ID")
 			Long id) {
