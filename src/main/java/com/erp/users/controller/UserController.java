@@ -3,6 +3,8 @@ package com.erp.users.controller;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.erp.users.constant.UserConstant;
 import com.erp.users.dto.ResponseDto;
 import com.erp.users.dto.UserDto;
+import com.erp.users.dto.UserEnvDto;
 import com.erp.users.service.IUserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,14 +28,28 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/users")
-@AllArgsConstructor
 @Validated
 @Tag(name = "User Controller", description = "User Management CRUD API At User Module")
+@RefreshScope
+@RequiredArgsConstructor
 public class UserController  {
-	IUserService userService;
+	private final IUserService userService;
+	private final UserEnvDto userEnvDto;
+
+	@Value("${build.version:unknown}")
+	private String buildVersion;
+
+	@Value("${build.author:unknown}")
+	private String buildAuthor;
+
+	@Value("${build.email:unknown}")
+	private String buildEmail;
+
+	@Value("${users.default.username:unknown}")
+	private String defaultUsername;
 	
 	@GetMapping("")
 	@Operation(summary = "Get all users", description = "Get all users from the database")
@@ -139,6 +156,28 @@ public class UserController  {
 	}
 	
 	
+	@GetMapping("/config")
+	@Operation(summary = "Get microservice info", description = "Get microservice info from application properties")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "Microservice info fetched successfully"),
+		@ApiResponse(responseCode = "500", description = "Internal server error")
+	})
+	public ResponseEntity<ResponseDto> msInfo(){
+		try {
+			// combine application env variables with config server properties
+			String info = String.format(
+				"%s by %s | version=%s | author=%s | email=%s | defaultUser=%s",
+				userEnvDto.appName(), userEnvDto.author(), buildVersion, buildAuthor, buildEmail, defaultUsername);
+			return new ResponseEntity<>(
+					new ResponseDto(200, "User Service is up and running", info, null, System.currentTimeMillis()),
+					HttpStatus.OK);
+		} catch (Exception e) {
+			// TODO: handle exception
+			return new ResponseEntity<>(
+					new ResponseDto(500, UserConstant.INTERNAL_SERVER_ERROR, null, e.getMessage(), System.currentTimeMillis()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 	
 
 }

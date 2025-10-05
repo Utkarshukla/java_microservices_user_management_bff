@@ -2,13 +2,17 @@ package com.erp.users;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+
+import com.erp.users.dto.UserEnvDto;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 
 @SpringBootApplication
+@EnableConfigurationProperties(value = {UserEnvDto.class})
 @EnableJpaAuditing(auditorAwareRef = "auditAwareImpl")
 @OpenAPIDefinition(
     info = @Info(
